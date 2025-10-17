@@ -1,0 +1,22 @@
+/* === PROMOTION LINE === */
+.promotion-line {
+    background: linear-gradient(45deg, var(--neon-cyan), var(--neon-purple));
+    color: #000000;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    margin: 2rem 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+    border: 2px solid var(--neon-cyan);
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+    }
+    to {
+        box-shadow: 0 0 30px rgba(180, 0, 255, 0.6);
+    }
+}

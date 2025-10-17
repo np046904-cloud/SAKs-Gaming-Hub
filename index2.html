@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gloopy Bird</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #87CEEB, #98FB98);
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .game-container {
+            text-align: center;
+            position: relative;
+        }
+        #gameCanvas {
+            border: 3px solid #2E8B57;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+        }
+        .score {
+            font-size: 28px;
+            color: #2E8B57;
+            margin: 15px 0;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .controls {
+            color: #2E8B57;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .costume-selector {
+            margin: 10px 0;
+        }
+        .costume-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+        .costume-btn.active {
+            background: #FF6B6B;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+        .costume-btn:hover {
+            transform: translateY(-2px);
+        }
+        .start-instruction {
+            color: #FF6B6B;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            animation: blink 2s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        .developer {
+            color: #666;
+            margin: 5px 0;
+            font-size: 14px;
+            font-style: italic;
+        }
+        .production {
+            color: #FF6B6B;
+            margin: 5px 0;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 800px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            z-index: 10;
+        }
+        .hidden {
+            display: none;
+        }
+        .btn {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="score">Score: <span id="score">0</span></div>
+        <div class="costume-selector">
+            <button class="costume-btn active" id="normalBtn">Normal Bird</button>
+            <button class="costume-btn" id="shitanBtn">Shitan Bird</button>
+        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div class="start-instruction" id="startInstruction">Click or Press SPACE to start flying!</div>
+        <div class="controls">Tap SPACE or CLICK to fly!</div>
+        <div class="developer">Developed by Keshaw</div>
+        <div class="production">A SAK's Gaming Productions</div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="startScreen" class="screen">
+        <h2 style="color: #FF6B6B; margin-bottom: 30px; font-size: 48px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">Gloopy Bird</h2>
+        <p style="color: #2E8B57; margin-bottom: 20px; font-size: 20px;">Help the bird fly through the pipes!</p>
+        <div class="costume-selector">
+            <button class="costume-btn active" id="startNormalBtn">Normal Bird</button>
+            <button class="costume-btn" id="startShitanBtn">Shitan Bird</button>
+        </div>
+        <button class="btn" id="startBtn">START GAME</button>
+        <div style="color: #666; margin-top: 20px; font-size: 14px; font-style: italic;">Developed by Keshaw</div>
+        <div style="color: #FF6B6B; margin-top: 10px; font-size: 16px; font-weight: bold;">A SAK's Gaming Productions</div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="screen hidden">
+        <h2 style="color: #FF6B6B; margin-bottom: 20px; font-size: 48px;">GAME OVER</h2>
+        <p style="color: #2E8B57; margin-bottom: 10px; font-size: 24px;">Your Score: <span id="finalScore">0</span></p>
+        <p style="color: #666; margin-bottom: 30px; font-size: 18px;">Better luck next time!</p>
+        <button class="btn" id="restartBtn">PLAY AGAIN</button>
+        <div style="color: #666; margin-top: 20px; font-size: 14px; font-style: italic;">Developed by Keshaw</div>
+        <div style="color: #FF6B6B; margin-top: 10px; font-size: 16px; font-weight: bold;">A SAK's Gaming Productions</div>
+    </div>
+
+    <!-- Win Screen -->
+    <div id="winScreen" class="screen hidden">
+        <h2 style="color: #4CAF50; margin-bottom: 20px; font-size: 48px;">CONGRATULATIONS!</h2>
+        <p style="color: #2E8B57; margin-bottom: 10px; font-size: 24px;">You reached 1000 points! 🎉</p>
+        <p style="color: #666; margin-bottom: 30px; font-size: 18px;">You are a true Bird Master!</p>
+        <button class="btn" id="winRestartBtn">PLAY AGAIN</button>
+        <div style="color: #666; margin-top: 20px; font-size: 14px; font-style: italic;">Developed by Keshaw</div>
+        <div style="color: #FF6B6B; margin-top: 10px; font-size: 16px; font-weight: bold;">A SAK's Gaming Productions</div>
+    </div>
+
+    <script>
+        // Game Variables
+        let canvas, ctx;
+        let gameRunning = false;
+        let animationId;
+        let currentCostume = 'normal'; // 'normal' or 'shitan'
+        let sparkles = [];
+        let gameStarted = false; // New variable to track if game has started
+
+        // Bird - Starting on nest
+        let bird = {
+            x: 100,
+            y: 450, // Starting position on nest
+            width: 50,
+            height: 35,
+            velocity: 0,
+            gravity: 0.6,
+            jump: -12,
+            color: '#FFD700',
+            wingPosition: 0,
+            onNest: true // New property to track if bird is on nest
+        };
+
+        // Pipes
+        let pipes = [];
+        let pipeWidth = 80;
+        let pipeGap = 200;
+        let pipeSpeed = 3;
+        let pipeFrequency = 90;
+
+        // Game State
+        let score = 0;
+        const WIN_SCORE = 1000;
+        let frames = 0;
+
+        // DOM Elements
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const winScreen = document.getElementById('winScreen');
+        const scoreDisplay = document.getElementById('score');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const winRestartBtn = document.getElementById('winRestartBtn');
+        const normalBtn = document.getElementById('normalBtn');
+        const shitanBtn = document.getElementById('shitanBtn');
+        const startNormalBtn = document.getElementById('startNormalBtn');
+        const startShitanBtn = document.getElementById('startShitanBtn');
+        const startInstruction = document.getElementById('startInstruction');
+
+        // Initialize Game
+        function initGame() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Event Listeners
+            startBtn.addEventListener('click', startGame);
+            restartBtn.addEventListener('click', restartGame);
+            winRestartBtn.addEventListener('click', restartGame);
+            
+            // Costume selection
+            normalBtn.addEventListener('click', () => setCostume('normal'));
+            shitanBtn.addEventListener('click', () => setCostume('shitan'));
+            startNormalBtn.addEventListener('click', () => setCostume('normal'));
+            startShitanBtn.addEventListener('click', () => setCostume('shitan'));
+            
+            document.addEventListener('keydown', handleKeyPress);
+            canvas.addEventListener('click', jump);
+        }
+
+        function setCostume(costume) {
+            currentCostume = costume;
+            
+            // Update button states
+            normalBtn.classList.toggle('active', costume === 'normal');
+            shitanBtn.classList.toggle('active', costume === 'shitan');
+            startNormalBtn.classList.toggle('active', costume === 'normal');
+            startShitanBtn.classList.toggle('active', costume === 'shitan');
+            
+            // Update bird color based on costume
+            if (costume === 'shitan') {
+                bird.color = '#FF4500'; // Orange-red for Shitan Bird
+            } else {
+                bird.color = '#FFD700'; // Gold for Normal Bird
+            }
+        }
+
+        // Start Game
+        function startGame() {
+            startScreen.classList.add('hidden');
+            gameRunning = true;
+            resetGame();
+            gameLoop();
+        }
+
+        // Restart Game
+        function restartGame() {
+            gameOverScreen.classList.add('hidden');
+            winScreen.classList.add('hidden');
+            gameRunning = true;
+            resetGame();
+            gameLoop();
+        }
+
+        // Reset Game State
+        function resetGame() {
+            bird.y = 450; // Reset to nest position
+            bird.velocity = 0;
+            bird.onNest = true;
+            gameStarted = false;
+            pipes = [];
+            sparkles = [];
+            score = 0;
+            frames = 0;
+            updateScore();
+            startInstruction.style.display = 'block';
+        }
+
+        // Handle Controls
+        function handleKeyPress(e) {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                jump();
+            }
+        }
+
+        function jump() {
+            if (gameRunning) {
+                if (!gameStarted && bird.onNest) {
+                    // First jump - start the game
+                    gameStarted = true;
+                    bird.onNest = false;
+                    startInstruction.style.display = 'none';
+                }
+                bird.velocity = bird.jump;
+                // Create sparkles when Shitan Bird jumps
+                if (currentCostume === 'shitan') {
+                    createSparkles();
+                }
+            }
+        }
+
+        function createSparkles() {
+            for (let i = 0; i < 8; i++) {
+                sparkles.push({
+                    x: bird.x + bird.width/2,
+                    y: bird.y + bird.height/2,
+                    size: Math.random() * 4 + 2,
+                    speedX: (Math.random() - 0.5) * 8,
+                    speedY: (Math.random() - 0.5) * 8,
+                    opacity: 1,
+                    color: ['#FFD700', '#FF6B6B', '#4CAF50', '#2196F3'][Math.floor(Math.random() * 4)],
+                    life: 30
+                });
+            }
+        }
+
+        // Create Pipe
+        function createPipe() {
+            let pipeHeight = Math.floor(Math.random() * (canvas.height - pipeGap - 150)) + 75;
+            
+            pipes.push({
+                x: canvas.width,
+                y: 0,
+                width: pipeWidth,
+                height: pipeHeight,
+                passed: false,
+                color: '#32CD32'
+            });
+            
+            pipes.push({
+                x: canvas.width,
+                y: pipeHeight + pipeGap,
+                width: pipeWidth,
+                height: canvas.height - pipeHeight - pipeGap,
+                passed: false,
+                color: '#32CD32'
+            });
+        }
+
+        // Update Game
+        function update() {
+            frames++;
+            
+            // Only apply physics if game has started
+            if (gameStarted) {
+                bird.velocity += bird.gravity;
+                bird.y += bird.velocity;
+                bird.wingPosition = Math.sin(frames * 0.2) * 5;
+                
+                // Create pipes only after game starts
+                if (frames % pipeFrequency === 0) {
+                    createPipe();
+                }
+            } else {
+                // Gentle breathing animation while on nest
+                bird.wingPosition = Math.sin(frames * 0.1) * 2;
+            }
+            
+            // Update sparkles
+            updateSparkles();
+            
+            // Move pipes and check collisions (only if game started)
+            if (gameStarted) {
+                for (let i = 0; i < pipes.length; i++) {
+                    pipes[i].x -= pipeSpeed;
+                    
+                    // Check collision
+                    if (checkCollision(bird, pipes[i])) {
+                        gameOver();
+                        return;
+                    }
+                    
+                    // Score point
+                    if (!pipes[i].passed && pipes[i].x + pipes[i].width < bird.x && i % 2 === 0) {
+                        pipes[i].passed = true;
+                        score++;
+                        updateScore();
+                        
+                        // Create sparkles when scoring with Shitan Bird
+                        if (currentCostume === 'shitan') {
+                            createSparkles();
+                        }
+                        
+                        // Check for win condition
+                        if (score >= WIN_SCORE) {
+                            winGame();
+                            return;
+                        }
+                    }
+                }
+                
+                // Remove off-screen pipes
+                pipes = pipes.filter(pipe => pipe.x + pipe.width > 0);
+                
+                // Check boundaries
+                if (bird.y <= 0 || bird.y + bird.height >= canvas.height) {
+                    gameOver();
+                }
+            }
+        }
+
+        function updateSparkles() {
+            for (let i = sparkles.length - 1; i >= 0; i--) {
+                let sparkle = sparkles[i];
+                sparkle.x += sparkle.speedX;
+                sparkle.y += sparkle.speedY;
+                sparkle.life--;
+                sparkle.opacity = sparkle.life / 30;
+                
+                if (sparkle.life <= 0) {
+                    sparkles.splice(i, 1);
+                }
+            }
+        }
+
+        // Check Collision
+        function checkCollision(bird, pipe) {
+            return bird.x < pipe.x + pipe.width &&
+                   bird.x + bird.width > pipe.x &&
+                   bird.y < pipe.y + pipe.height &&
+                   bird.y + bird.height > pipe.y;
+        }
+
+        // Update Score Display
+        function updateScore() {
+            scoreDisplay.textContent = score;
+        }
+
+        // Draw Game
+        function draw() {
+            // Clear canvas with sky background
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#E0F6FF');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw clouds
+            drawClouds();
+            
+            // Draw ground
+            ctx.fillStyle = '#8FBC8F';
+            ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+            
+            // Draw grass
+            ctx.fillStyle = '#7CFC00';
+            ctx.fillRect(0, canvas.height - 80, canvas.width, 20);
+            
+            // Draw nest if bird is on it
+            if (bird.onNest) {
+                drawNest();
+            }
+            
+            // Draw pipes (only if game started)
+            if (gameStarted) {
+                pipes.forEach(pipe => {
+                    // Pipe body
+                    ctx.fillStyle = pipe.color;
+                    ctx.fillRect(pipe.x, pipe.y, pipe.width, pipe.height);
+                    
+                    // Pipe caps
+                    ctx.fillStyle = '#228B22';
+                    ctx.fillRect(pipe.x - 5, pipe.y, pipe.width + 10, 25);
+                    ctx.fillRect(pipe.x - 5, pipe.y + pipe.height - 25, pipe.width + 10, 25);
+                });
+            }
+            
+            // Draw sparkles for Shitan Bird
+            if (currentCostume === 'shitan') {
+                drawSparkles();
+            }
+            
+            // Draw bird
+            drawBird();
+            
+            // Draw score
+            ctx.fillStyle = '#2E8B57';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('Score: ' + score, 20, 40);
+            
+            // Draw current costume indicator
+            ctx.fillStyle = currentCostume === 'shitan' ? '#FF4500' : '#2E8B57';
+            ctx.font = '14px Arial';
+            ctx.fillText('Costume: ' + (currentCostume === 'shitan' ? 'Shitan Bird' : 'Normal Bird'), 20, 70);
+        }
+
+        function drawNest() {
+            // Draw nest
+            ctx.fillStyle = '#8B4513';
+            ctx.beginPath();
+            ctx.ellipse(100, 480, 60, 20, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Nest details
+            ctx.fillStyle = '#A0522D';
+            ctx.beginPath();
+            ctx.ellipse(100, 480, 50, 15, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Nest texture
+            ctx.strokeStyle = '#654321';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 8; i++) {
+                ctx.beginPath();
+                ctx.arc(100 + Math.cos(i * 0.8) * 40, 480 + Math.sin(i * 0.8) * 12, 5, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        function drawSparkles() {
+            sparkles.forEach(sparkle => {
+                ctx.save();
+                ctx.globalAlpha = sparkle.opacity;
+                ctx.fillStyle = sparkle.color;
+                ctx.beginPath();
+                ctx.arc(sparkle.x, sparkle.y, sparkle.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add glow effect
+                ctx.shadowColor = sparkle.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(sparkle.x, sparkle.y, sparkle.size * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.restore();
+            });
+        }
+
+        // Draw clouds in background
+        function drawClouds() {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            
+            // Cloud positions based on frames for subtle movement
+            let cloud1X = (frames * 0.5) % (canvas.width + 200) - 100;
+            let cloud2X = (frames * 0.3 + 300) % (canvas.width + 200) - 100;
+            
+            drawSingleCloud(cloud1X, 100);
+            drawSingleCloud(cloud2X, 180);
+        }
+
+        function drawSingleCloud(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, 30, 0, Math.PI * 2);
+            ctx.arc(x + 25, y - 10, 25, 0, Math.PI * 2);
+            ctx.arc(x + 50, y, 30, 0, Math.PI * 2);
+            ctx.arc(x + 25, y + 10, 25, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Draw bird
+        function drawBird() {
+            ctx.save();
+            
+            // Bird body with different colors based on costume
+            ctx.fillStyle = bird.color;
+            ctx.beginPath();
+            ctx.ellipse(bird.x + bird.width/2, bird.y + bird.height/2, bird.width/2, bird.height/2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Wing with different colors
+            ctx.fillStyle = currentCostume === 'shitan' ? '#FF6347' : '#FFA500';
+            ctx.beginPath();
+            ctx.ellipse(bird.x + bird.width/3, bird.y + bird.height/2 + bird.wingPosition, 15, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Eye
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(bird.x + bird.width - 15, bird.y + bird.height/3, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(bird.x + bird.width - 12, bird.y + bird.height/3, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Beak
+            ctx.fillStyle = currentCostume === 'shitan' ? '#FF8C00' : '#FF8C00';
+            ctx.beginPath();
+            ctx.moveTo(bird.x + bird.width, bird.y + bird.height/2);
+            ctx.lineTo(bird.x + bird.width + 15, bird.y + bird.height/2 - 5);
+            ctx.lineTo(bird.x + bird.width + 15, bird.y + bird.height/2 + 5);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Special effects for Shitan Bird
+            if (currentCostume === 'shitan') {
+                // Glow effect
+                ctx.shadowColor = '#FF4500';
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.ellipse(bird.x + bird.width/2, bird.y + bird.height/2, bird.width/2 + 2, bird.height/2 + 2, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+            
+            ctx.restore();
+        }
+
+        // Game Loop
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            update();
+            draw();
+            
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // Game Over
+        function gameOver() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            
+            finalScoreDisplay.textContent = score;
+            setTimeout(() => {
+                gameOverScreen.classList.remove('hidden');
+            }, 500);
+        }
+
+        // Win Game
+        function winGame() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            
+            setTimeout(() => {
+                winScreen.classList.remove('hidden');
+            }, 500);
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
